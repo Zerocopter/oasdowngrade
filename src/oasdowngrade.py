@@ -5,7 +5,7 @@ import sys
 from enum import Enum
 
 DESCRIPTION = """
-This program attempts to downgrade certain OpenAPI 3.1 specification files to version 3.0.3, so that they can be used with common generators that still lack full support for 3.1,
+This program attempts to downgrade OpenAPI 3.1 specification files to version 3.0.3, so that they can be used with common generators that still lack full support for 3.1,
 including the popular openapi-generator (https://openapi-generator.tech). It may not work in all cases and was only tested with a number of FastAPI projects.
 
 It provides workarounds for the following incompatibilities:
@@ -196,26 +196,31 @@ def main():
     )
     parser.add_argument('filename')
     parser.add_argument('-o', '--outputfile', help='Output file name', default=None)
-    parser.add_argument('-f', '--format', help='Output format (json, redoc)', action='store', default='json')
+    parser.add_argument('-f', '--format', help='Output format (json, redoc)', action='store')
     args = parser.parse_args()
 
-    with open(args.filename) as f:
-        json_obj = json.load(f)
-    
-    converted_json = process_json(json_obj)
+    try:
+        with open(args.filename) as f:
+            json_obj = json.load(f)
+        
+        converted_json = process_json(json_obj)
 
-    if not args.outputfile:
-        print(json.dumps(converted_json, indent=2))
-        return
+        if not args.outputfile:
+            print(json.dumps(converted_json, indent=2))
+            return
 
-    if args.format == 'redoc':
-        output = REDOC_HTML_TEMPLATE % json.dumps(converted_json)
-    else:
-        output = json.dumps(converted_json)
+        if args.format == 'redoc':
+            output = REDOC_HTML_TEMPLATE % json.dumps(converted_json)
+        elif args.format == 'json':
+            output = json.dumps(converted_json)
+        else:
+            raise Exception('Invalid output format')
 
-    if args.outputfile:
-        with open(args.outputfile, 'w') as f:
-            f.write(output)
+        if args.outputfile:
+            with open(args.outputfile, 'w') as f:
+                f.write(output)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
