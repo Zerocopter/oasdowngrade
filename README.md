@@ -6,7 +6,7 @@ workarounds for the following incompatibilities:
 - const definitions - convert to an enum with single value
 - null types - remove and set a nullable property for siblings
 
-## installation
+## Installation
 ```
 pip install .
 ```
